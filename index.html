@@ -7,10 +7,8 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
-    <script
-    src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-    crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
 
     <style>
 
@@ -174,197 +172,198 @@
             center: [9.9785283, 53.5651965],
             zoom: 11
         });
-   
-        $.getJSON("germanypricing.json", function(json) {
-             json.features.forEach(e => {
-                 var change = "";
-                 if(e.properties.Pricechange > 0)
+
+        $.getJSON("germanypricing.json", function (json) {
+            json.features.forEach(e => {
+                var change = "";
+                if (e.properties.Pricechange > 0)
                     change = "(+)";
-                 if(e.properties.Pricechange < 0)
+                if (e.properties.Pricechange < 0)
                     change = "(-)";
-                 e.properties.PriceChangeIndicator = change;
-             });
-             data = json;
-        });
+                e.properties.PriceChangeIndicator = change;
+            });
+            data = json;
+            function ChangeSlider(e) {
+                var hour = parseInt(e);
+                timeSlot = parseInt(e);
 
-        function ChangeSlider(e) {
-            var hour = parseInt(e);
-            timeSlot = parseInt(e);
+                hour = Math.floor(timeSlot * 15 / 60);
 
-            hour = Math.floor(timeSlot * 15 / 60);
+                var minute = (timeSlot * 15 % 60) + 5;
+                console.log(minute);
 
-            var minute = (timeSlot * 15 % 60) + 5;
-            console.log(minute);
+                // update the map
+                filterHour = ['==', ['number', ['get', 'Hour']], hour];
+                filterMinute = ['==', ['number', ['get', 'Minute']], minute];
+                //map.setFilter('collisions', ['all', filterHour, filterDay]);
+                map.setFilter('prices', ['all', filterHour, filterMinute]);
+                map.setFilter('labels', ['all', filterHour, filterMinute]);
+                map.setFilter('brandlabels', ['all', filterHour, filterMinute]);
 
-            // update the map
-            filterHour = ['==', ['number', ['get', 'Hour']], hour];
-            filterMinute = ['==', ['number', ['get', 'Minute']], minute];
-            //map.setFilter('collisions', ['all', filterHour, filterDay]);
-            map.setFilter('prices', ['all', filterHour, filterMinute]);
-            map.setFilter('labels', ['all', filterHour, filterMinute]);
-            map.setFilter('brandlabels', ['all', filterHour, filterMinute]);
+                // converting 0-23 hour to AMPM format
+                var ampm = hour >= 12 ? 'PM' : 'AM';
+                var hour12 = hour % 12 ? hour % 12 : 12;
 
-            // converting 0-23 hour to AMPM format
-            var ampm = hour >= 12 ? 'PM' : 'AM';
-            var hour12 = hour % 12 ? hour % 12 : 12;
-
-            // update text in the UI
-            document.getElementById('active-hour').innerText = (hour.toString().length == 1 ? "0" + hour : hour) + ":" +
-                (minute.toString().length == 1 ? "0" + minute : minute);
-        }
-
-
-
-        function animatePricing(currentVal) {
-            // Update the data to a new position based on the animation timestamp. The
-            // divisor in the expression `timestamp / 1000` controls the animation speed.
-            ChangeSlider(currentVal);
-            document.getElementById('slider').value = currentVal;
-        }
-
-        function play() {
-            if (animation) {
-                clearInterval(animation);
-                animation = null;
-                document.getElementById('playbutton').innerHTML = "Play";
-            }
-            else {
-                animation = setInterval(function () {
-                    if (timeSlot < 95)
-                        animatePricing(timeSlot + 1);
-                }, 500);
-                document.getElementById('playbutton').innerHTML = "Pause";
-                
+                // update text in the UI
+                document.getElementById('active-hour').innerText = (hour.toString().length == 1 ? "0" + hour : hour) + ":" +
+                    (minute.toString().length == 1 ? "0" + minute : minute);
             }
 
-        }
-
-        map.on('load', function () {
-
-            var filterHour = ['==', ['number', ['get', 'Hour']], 12];
-            var filterMinute = ['==', ['number', ['get', 'Minute']], 5];
-            map.addLayer({
-                id: 'prices',
-
-                type: 'circle',
-                source: {
-                    type: 'geojson',
-                    //data: './germanypricing.json' // replace this with the url of your own geojson
-                    data:data
-                },
-                paint: {
-                    'circle-radius': ['interpolate',
-                        ['linear'],
-                        ['number', ['get', 'AbsPriceChange']],
-                        0, 6,
-                        15, 20
-                    ],
-                    //'circle-radius': 25,
-                    // 'circle-color': [
-                    //   'interpolate',
-                    //   ['linear'],
-                    //   ['number', ['get', 'Price']],
-                    //   0, '#2DC4B2',
-                    //   1, '#3BB3C3',
-                    //   2, '#669EC4',
-                    //   3, '#8B88B6',
-                    //   4, '#A2719B',
-                    //   5, '#AA5E79'
-                    // ],
-
-                    'circle-color': ["interpolate",
-                        ["linear"],
-                        ["get", "Price"],
-                        130, "#00ff00",
-                        160, "#ff0000"
-                    ],
-
-                    //'circle-color': 'blue',
-
-                    'circle-opacity': 0.9 
-                },
-                //'filter': ['all', filterHour, filterDay]
-                'filter': ['all', filterHour, filterMinute]
-            }, 'admin-2-boundaries-dispute');  
 
 
-            map.addLayer({
-                "id": "labels",
-                "type": "symbol",
-                minzoom: 12,
-                source: {
-                    type: 'geojson',
-                    //data: './germanypricing.json' // replace this with the url of your own geojson
-                    data:data
-                },
-                "layout": {
-                    "text-offset": [0, -1],
-                    "text-anchor": "bottom",
-                    "text-field": "{Price} {PriceChangeIndicator}",
-                    "text-font": [
-                        "DIN Offc Pro Medium",
-                        "Arial Unicode MS Bold"
-                    ],
-                    "text-size": 12
-                },
-                'filter': ['all', filterHour, filterMinute]
+            function animatePricing(currentVal) {
+                // Update the data to a new position based on the animation timestamp. The
+                // divisor in the expression `timestamp / 1000` controls the animation speed.
+                ChangeSlider(currentVal);
+                document.getElementById('slider').value = currentVal;
+            }
+
+            function play() {
+                if (animation) {
+                    clearInterval(animation);
+                    animation = null;
+                    document.getElementById('playbutton').innerHTML = "Play";
+                }
+                else {
+                    animation = setInterval(function () {
+                        if (timeSlot < 95)
+                            animatePricing(timeSlot + 1);
+                    }, 500);
+                    document.getElementById('playbutton').innerHTML = "Pause";
+
+                }
+
+            }
+
+            map.on('load', function () {
+
+                var filterHour = ['==', ['number', ['get', 'Hour']], 12];
+                var filterMinute = ['==', ['number', ['get', 'Minute']], 5];
+                map.addLayer({
+                    id: 'prices',
+
+                    type: 'circle',
+                    source: {
+                        type: 'geojson',
+                        //data: './germanypricing.json' // replace this with the url of your own geojson
+                        data: data
+                    },
+                    paint: {
+                        'circle-radius': ['interpolate',
+                            ['linear'],
+                            ['number', ['get', 'AbsPriceChange']],
+                            0, 6,
+                            15, 20
+                        ],
+                        //'circle-radius': 25,
+                        // 'circle-color': [
+                        //   'interpolate',
+                        //   ['linear'],
+                        //   ['number', ['get', 'Price']],
+                        //   0, '#2DC4B2',
+                        //   1, '#3BB3C3',
+                        //   2, '#669EC4',
+                        //   3, '#8B88B6',
+                        //   4, '#A2719B',
+                        //   5, '#AA5E79'
+                        // ],
+
+                        'circle-color': ["interpolate",
+                            ["linear"],
+                            ["get", "Price"],
+                            130, "#00ff00",
+                            160, "#ff0000"
+                        ],
+
+                        //'circle-color': 'blue',
+
+                        'circle-opacity': 0.9
+                    },
+                    //'filter': ['all', filterHour, filterDay]
+                    'filter': ['all', filterHour, filterMinute]
+                }, 'admin-2-boundaries-dispute');
+
+
+                map.addLayer({
+                    "id": "labels",
+                    "type": "symbol",
+                    minzoom: 12,
+                    source: {
+                        type: 'geojson',
+                        //data: './germanypricing.json' // replace this with the url of your own geojson
+                        data: data
+                    },
+                    "layout": {
+                        "text-offset": [0, -1],
+                        "text-anchor": "bottom",
+                        "text-field": "{Price} {PriceChangeIndicator}",
+                        "text-font": [
+                            "DIN Offc Pro Medium",
+                            "Arial Unicode MS Bold"
+                        ],
+                        "text-size": 12
+                    },
+                    'filter': ['all', filterHour, filterMinute]
+                });
+
+
+                map.addLayer({
+                    "id": "brandlabels",
+                    "type": "symbol",
+                    minzoom: 12,
+                    source: {
+                        type: 'geojson',
+                        //data: './germanypricing.json' // replace this with the url of your own geojson
+                        data: data
+                    },
+                    "layout": {
+                        "text-anchor": "top",
+                        "text-offset": [0, 1],
+                        "text-field": "{Brand}",
+                        "text-font": [
+                            "DIN Offc Pro Medium",
+                            "Arial Unicode MS Bold"
+                        ],
+                        "text-size": 10
+                    },
+                    'filter': ['all', filterHour, filterMinute]
+                });
+
+
+
+                // update hour filter when the slider is dragged
+                document.getElementById('slider').addEventListener('change', function (e) {
+                    //ChangeSlider(e);
+                });
+
+                document.getElementById('slider').addEventListener('input', function (e) {
+                    //clearInterval(animation);
+                    ChangeSlider(e.target.value);
+                });
+
+                ChangeSlider(18);
+
+                // document.getElementById('filters').addEventListener('change', function (e) {
+                //     var day = e.target.value;
+                //     // update the map filter
+                //     if (day === 'all') {
+                //         filterDay = ['!=', ['string', ['get', 'Day']], 'placeholder'];
+                //     } else if (day === 'weekday') {
+                //         filterDay = ['match', ['get', 'Day'], ['Sat', 'Sun'], false, true];
+                //     } else if (day === 'weekend') {
+                //         filterDay = ['match', ['get', 'Day'], ['Sat', 'Sun'], true, false];
+                //     } else {
+                //         console.log('error');
+                //     };
+                //     map.setFilter('prices', ['all', filterHour, filterDay]);
+                //     map.setFilter('labels', ['all', filterHour, filterDay]);
+                //     map.setFilter('brandlabels', ['all', filterHour, filterDay]);
+                // });
+
             });
-
-
-            map.addLayer({
-                "id": "brandlabels",
-                "type": "symbol",
-                minzoom: 12,
-                source: {
-                    type: 'geojson',
-                    //data: './germanypricing.json' // replace this with the url of your own geojson
-                    data:data
-                },
-                "layout": {
-                    "text-anchor": "top",
-                    "text-offset": [0, 1],
-                    "text-field": "{Brand}",
-                    "text-font": [
-                        "DIN Offc Pro Medium",
-                        "Arial Unicode MS Bold"
-                    ],
-                    "text-size": 10
-                },
-                'filter': ['all', filterHour, filterMinute]
-            });
-
-
-
-            // update hour filter when the slider is dragged
-            document.getElementById('slider').addEventListener('change', function (e) {
-                //ChangeSlider(e);
-            });
-
-            document.getElementById('slider').addEventListener('input', function (e) {
-                //clearInterval(animation);
-                ChangeSlider(e.target.value);
-            });
-
-            ChangeSlider(18);
-
-            // document.getElementById('filters').addEventListener('change', function (e) {
-            //     var day = e.target.value;
-            //     // update the map filter
-            //     if (day === 'all') {
-            //         filterDay = ['!=', ['string', ['get', 'Day']], 'placeholder'];
-            //     } else if (day === 'weekday') {
-            //         filterDay = ['match', ['get', 'Day'], ['Sat', 'Sun'], false, true];
-            //     } else if (day === 'weekend') {
-            //         filterDay = ['match', ['get', 'Day'], ['Sat', 'Sun'], true, false];
-            //     } else {
-            //         console.log('error');
-            //     };
-            //     map.setFilter('prices', ['all', filterHour, filterDay]);
-            //     map.setFilter('labels', ['all', filterHour, filterDay]);
-            //     map.setFilter('brandlabels', ['all', filterHour, filterDay]);
-            // });
-
         });
+
+
     </script>
 </body>
 
