@@ -355,7 +355,7 @@
                     + "Brand: " + e.features[0].properties.Brand + "<br>"
                     + "Date/time: " + e.features[0].properties.DT + "<br>"
                     + "Price: " + e.features[0].properties.Price + "<br>"
-                    + "Price change last 15 min: " + e.features[0].properties.Pricechange + "<br>";
+                    + "Price change last 15 min: " + (e.features[0].properties.Pricechange > 0 ? "+" + e.features[0].properties.Pricechange : e.features[0].properties.Pricechange)  + "<br>";
 
                     // Ensure that if the map is zoomed out such that multiple
                     // copies of the feature are visible, the popup appears
