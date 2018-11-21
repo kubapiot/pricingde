@@ -7,6 +7,10 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+    <script
+    src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
 
     <style>
 
@@ -162,6 +166,7 @@
     <script>
 
         var animation;
+        var data;
         mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2lqbmpqazdlMDBsdnRva284cWd3bm11byJ9.V6Hg2oYJwMAxeoR9GEzkAA';
         var map = new mapboxgl.Map({
             container: 'map',
@@ -169,7 +174,18 @@
             center: [9.9785283, 53.5651965],
             zoom: 11
         });
-
+   
+        $.getJSON("germanypricing.json", function(json) {
+             json.features.forEach(e => {
+                 var change = "";
+                 if(e.properties.Pricechange > 0)
+                    change = "(+)";
+                 if(e.properties.Pricechange < 0)
+                    change = "(-)";
+                 e.properties.PriceChangeIndicator = change;
+             });
+             data = json;
+        });
 
         function ChangeSlider(e) {
             var hour = parseInt(e);
@@ -233,7 +249,8 @@
                 type: 'circle',
                 source: {
                     type: 'geojson',
-                    data: './germanypricing.json' // replace this with the url of your own geojson
+                    //data: './germanypricing.json' // replace this with the url of your own geojson
+                    data:data
                 },
                 paint: {
                     'circle-radius': ['interpolate',
@@ -277,12 +294,13 @@
                 minzoom: 12,
                 source: {
                     type: 'geojson',
-                    data: './germanypricing.json' // replace this with the url of your own geojson
+                    //data: './germanypricing.json' // replace this with the url of your own geojson
+                    data:data
                 },
                 "layout": {
                     "text-offset": [0, -1],
                     "text-anchor": "bottom",
-                    "text-field": "{Price}",
+                    "text-field": "{Price} {PriceChangeIndicator}",
                     "text-font": [
                         "DIN Offc Pro Medium",
                         "Arial Unicode MS Bold"
@@ -299,7 +317,8 @@
                 minzoom: 12,
                 source: {
                     type: 'geojson',
-                    data: './germanypricing.json' // replace this with the url of your own geojson
+                    //data: './germanypricing.json' // replace this with the url of your own geojson
+                    data:data
                 },
                 "layout": {
                     "text-anchor": "top",
