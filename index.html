@@ -166,12 +166,7 @@
         var animation;
         var data;
         mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2lqbmpqazdlMDBsdnRva284cWd3bm11byJ9.V6Hg2oYJwMAxeoR9GEzkAA';
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/light-v9',
-            center: [9.9785283, 53.5651965],
-            zoom: 11
-        });
+        var map;
 
         $.getJSON("germanypricing.json", function (json) {
             json.features.forEach(e => {
@@ -183,6 +178,14 @@
                 e.properties.PriceChangeIndicator = change;
             });
             data = json;
+
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/light-v9',
+                center: [9.9785283, 53.5651965],
+                zoom: 11
+            });
+            
             function ChangeSlider(e) {
                 var hour = parseInt(e);
                 timeSlot = parseInt(e);
