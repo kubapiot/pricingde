@@ -168,6 +168,59 @@
         mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2lqbmpqazdlMDBsdnRva284cWd3bm11byJ9.V6Hg2oYJwMAxeoR9GEzkAA';
         var map;
 
+        function ChangeSlider(e) {
+            var hour = parseInt(e);
+            timeSlot = parseInt(e);
+
+            hour = Math.floor(timeSlot * 15 / 60);
+
+            var minute = (timeSlot * 15 % 60) + 5;
+            console.log(minute);
+
+            // update the map
+            filterHour = ['==', ['number', ['get', 'Hour']], hour];
+            filterMinute = ['==', ['number', ['get', 'Minute']], minute];
+            //map.setFilter('collisions', ['all', filterHour, filterDay]);
+            map.setFilter('prices', ['all', filterHour, filterMinute]);
+            map.setFilter('labels', ['all', filterHour, filterMinute]);
+            map.setFilter('brandlabels', ['all', filterHour, filterMinute]);
+
+            // converting 0-23 hour to AMPM format
+            var ampm = hour >= 12 ? 'PM' : 'AM';
+            var hour12 = hour % 12 ? hour % 12 : 12;
+
+            // update text in the UI
+            document.getElementById('active-hour').innerText = (hour.toString().length == 1 ? "0" + hour : hour) + ":" +
+                (minute.toString().length == 1 ? "0" + minute : minute);
+        }
+
+
+
+        function animatePricing(currentVal) {
+            // Update the data to a new position based on the animation timestamp. The
+            // divisor in the expression `timestamp / 1000` controls the animation speed.
+            ChangeSlider(currentVal);
+            document.getElementById('slider').value = currentVal;
+        }
+
+        function play() {
+            if (animation) {
+                clearInterval(animation);
+                animation = null;
+                document.getElementById('playbutton').innerHTML = "Play";
+            }
+            else {
+                animation = setInterval(function () {
+                    if (timeSlot < 95)
+                        animatePricing(timeSlot + 1);
+                }, 500);
+                document.getElementById('playbutton').innerHTML = "Pause";
+
+            }
+
+        }
+
+
         $.getJSON("germanypricing.json", function (json) {
             json.features.forEach(e => {
                 var change = "";
@@ -185,58 +238,8 @@
                 center: [9.9785283, 53.5651965],
                 zoom: 11
             });
-            
-            function ChangeSlider(e) {
-                var hour = parseInt(e);
-                timeSlot = parseInt(e);
-
-                hour = Math.floor(timeSlot * 15 / 60);
-
-                var minute = (timeSlot * 15 % 60) + 5;
-                console.log(minute);
-
-                // update the map
-                filterHour = ['==', ['number', ['get', 'Hour']], hour];
-                filterMinute = ['==', ['number', ['get', 'Minute']], minute];
-                //map.setFilter('collisions', ['all', filterHour, filterDay]);
-                map.setFilter('prices', ['all', filterHour, filterMinute]);
-                map.setFilter('labels', ['all', filterHour, filterMinute]);
-                map.setFilter('brandlabels', ['all', filterHour, filterMinute]);
-
-                // converting 0-23 hour to AMPM format
-                var ampm = hour >= 12 ? 'PM' : 'AM';
-                var hour12 = hour % 12 ? hour % 12 : 12;
-
-                // update text in the UI
-                document.getElementById('active-hour').innerText = (hour.toString().length == 1 ? "0" + hour : hour) + ":" +
-                    (minute.toString().length == 1 ? "0" + minute : minute);
-            }
 
 
-
-            function animatePricing(currentVal) {
-                // Update the data to a new position based on the animation timestamp. The
-                // divisor in the expression `timestamp / 1000` controls the animation speed.
-                ChangeSlider(currentVal);
-                document.getElementById('slider').value = currentVal;
-            }
-
-            function play() {
-                if (animation) {
-                    clearInterval(animation);
-                    animation = null;
-                    document.getElementById('playbutton').innerHTML = "Play";
-                }
-                else {
-                    animation = setInterval(function () {
-                        if (timeSlot < 95)
-                            animatePricing(timeSlot + 1);
-                    }, 500);
-                    document.getElementById('playbutton').innerHTML = "Pause";
-
-                }
-
-            }
 
             map.on('load', function () {
 
