@@ -3,16 +3,13 @@
 
 <head>
     <meta charset='utf-8' />
-    <title>NetWatch Pricing - Germany</title>
+    <title>NetWatch Price Changes - Germany</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
 
-       
-
-            
     <style>
 
         .column {
@@ -122,7 +119,7 @@
 
     <div id='map'></div>
     <div id='console'>
-        <h2>E10 Pricing - 15/11/2018</h2>
+        <h2>E10 Price Changes - 15/11/2018</h2>
         <!-- <div class='session'>
             <h2></h2>
             <div class='row colors'>
@@ -148,37 +145,34 @@
             </div>
         </div>
         <div>
-            <a href="pricechanges.html" style="font-size: small;" >Show Price Changes Layer</a>
+            <a href="index.html" style="font-size: small;">Show Pricing Layer</a>
         </div>
-
-        <div>
-
-            <style type="text/css">
-                .tg  {border-collapse:collapse;border-spacing:0;}
-                .tg td{font-family:Arial, sans-serif;font-size:11px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-                .tg th{font-family:Arial, sans-serif;font-size:11px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-                .tg .tg-zv4m{border-color:#ffffff;text-align:left;vertical-align:top}
-                .tg .tg-22sb{background-color:#f8ff00;border-color:#ffffff;text-align:left;vertical-align:top}
-                .tg .tg-qc6x{background-color:#32cb00;border-color:#ffffff;text-align:left;vertical-align:top}
-                .tg .tg-tbg8{background-color:#fe0000;border-color:#ffffff;text-align:left;vertical-align:top}
-                </style>
-                <table class="tg">
-                  <tr>
-                    <th class="tg-qc6x">&nbsp;&nbsp;</th>
-                    <th class="tg-zv4m"></th>
-                    <th class="tg-zv4m">&lt; 140.0</th>
-                  </tr>
-                  <tr>
-                    <td class="tg-22sb"></td>
-                    <td class="tg-zv4m"></td>
-                    <td class="tg-zv4m">140.0 - 149.9</td>
-                  </tr>
-                  <tr>
-                    <td class="tg-tbg8"></td>
-                    <td class="tg-zv4m"></td>
-                    <td class="tg-zv4m">&gt; 149.9</td>
-                  </tr>
-                </table>
+        <style type="text/css">
+            .tg  {border-collapse:collapse;border-spacing:0;}
+            .tg td{font-family:Arial, sans-serif;font-size:11px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+            .tg th{font-family:Arial, sans-serif;font-size:11px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+            .tg .tg-zv4m{border-color:#ffffff;text-align:left;vertical-align:top}
+            .tg .tg-22sb{background-color:#000000;border-color:#ffffff;text-align:left;vertical-align:top}
+            .tg .tg-qc6x{background-color:#32cb00;border-color:#ffffff;text-align:left;vertical-align:top}
+            .tg .tg-tbg8{background-color:#fe0000;border-color:#ffffff;text-align:left;vertical-align:top}
+            </style>
+            <table class="tg">
+              <tr>
+                <th class="tg-qc6x">&nbsp;&nbsp;</th>
+                <th class="tg-zv4m"></th>
+                <th class="tg-zv4m">Price Down</th>
+              </tr>
+              <tr>
+                <td class="tg-22sb"></td>
+                <td class="tg-zv4m"></td>
+                <td class="tg-zv4m">Price Not Changed</td>
+              </tr>
+              <tr>
+                <td class="tg-tbg8"></td>
+                <td class="tg-zv4m"></td>
+                <td class="tg-zv4m">Price Up</td>
+              </tr>
+            </table>
         <!-- <div class='session'>
             <h2>Day of the week</h2>
             <div class='row' id='filters'>
@@ -258,8 +252,9 @@
                 if (e.properties.Pricechange < 0)
                     change = "(-)";
                 e.properties.PriceChangeIndicator = change;
-
+                e.properties.PriceChangeNum = e.properties.Pricechange;
                 e.properties.Pricechange = parseFloat(Math.round(e.properties.Pricechange * 10) / 10).toFixed(1);
+                
             });
             data = json;
 
@@ -307,8 +302,8 @@
                         // ],
 
                         'circle-color': {
-                            property: 'Price',
-                            stops: [[0, '#00ff00'],[140, '#00ff00'], [140.000001, '#ffff10'],[150, '#ffff10'], [150.000001, '#ff0000'], [160, '#ff0000']]
+                            property: 'PriceChangeNum',
+                            stops: [[-1, '#00ff00'],[0, '#000000'], [1, '#ff0000']]
                         },
 
 
@@ -342,7 +337,8 @@
                         "text-offset": [0, -1],
                         "text-anchor": "bottom",
                         "text-allow-overlap":true,
-                        "text-field": "{Price} {PriceChangeIndicator}",
+                        //"text-field": "{Price} {PriceChangeIndicator}",
+                        "text-field": "{Price}",
                         "text-font": [
                             "DIN Offc Pro Medium",
                             "Arial Unicode MS Bold"
